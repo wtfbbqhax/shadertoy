@@ -1,4 +1,4 @@
-# NanoGUI Test
+# Shadertoy Demo
 
 Shader source:
 http://glslsandbox.com/e#35192.0
@@ -8,13 +8,10 @@ to download the dependencies using git submodule...
 
     git submodule update --init --recursive
 
-Simple example looks like this:
-http://glslsandbox.com/e#35192.0
-
 ![Screenshot](https://raw.githubusercontent.com/wtfbbqhax/shadertoy/master/screenshot.png "Screenshot")
 
+Thanks to [darenmothersele](darenmothersele/nanogui-test) for this nice template project.
 Uses [NanoGUI](https://github.com/wjakob/nanogui), [GLFW](http://www.glfw.org/),
 [Eigen](http://eigen.tuxfamily.org/), [Embed Resource](https://github.com/cyrilcode/embed-resource),
-and raymarching template from [Raymarching.com](http://raymarching.com/).
+and toonish cloud fragment shader from [glslsandbox.com](http://glslsandbox.com/e#35192.0)
 
-Thanks to darenmothersele for his nanogui-test repo which is what I started with.
