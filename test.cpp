@@ -1,52 +1,35 @@
-#include <iostream>
-#include <nanogui/screen.h>
-#include <nanogui/window.h>
-#include <nanogui/layout.h>
-#include <nanogui/button.h>
-#include <nanogui/glutil.h>
-#include <nanogui/label.h>
-#include <nanogui/theme.h>
-#include <nanogui/formhelper.h>
-#include <nanogui/slider.h>
+#include <nanogui/nanogui.h>
 #include "Resource.h"
 
-
 using namespace std;
-using nanogui::Screen;
-using nanogui::Window;
-using nanogui::GroupLayout;
-using nanogui::Button;
-using nanogui::Vector2f;
-using nanogui::MatrixXu;
-using nanogui::MatrixXf;
-using nanogui::Label;
-
+using namespace nanogui;
 
 int main() {
 
     nanogui::init();
 
-    /**
-     * Create a screen, add a window.
-     * To the window add a label and a slider widget.
-     */
+    float globalTime = 0;
+    int frame = 0;
 
-    Screen app{{1024 / 2, 768 / 2}, "NanoGUI Test"};
+    //int iFrame = 0;
+    //float iGlobalTime = 0;
+    //float iRenderTime = 0;
+    float iModulation = 5.0f;
 
-    Window window{&app, ""};
+    Screen *app = new Screen({ {1024, 768}, "Demo" });
+    Window window(app, "");
     window.setPosition({15, 15});
-    window.setLayout(new GroupLayout(5, 5, 0, 0));
+    window.setLayout(new GroupLayout());
 
-    Label *l = new Label(&window,"MODULATION","sans-bold");
-    l->setFontSize(10);
-    nanogui::Slider *slider = new nanogui::Slider(&window);
-    slider->setValue(0.5f);
-    float modulation = 5.0f;
-    slider->setCallback([&modulation](float value) { modulation = value * 10.0f; });
+    Label *l = new Label(&window,"THIS IS A DEMO","sans-bold");
+    l->setFontSize(20);
+    //nanogui::Slider *slider = new nanogui::Slider(&window);
+    //slider->setValue(0.5f);
+    //slider->setCallback([&iModulation](float value) { iModulation = value * 10.0f; });
+
 
     // Do the layout calculations based on what was added to the GUI
-    app.performLayout();
-
+    app->performLayout();
 
     /**
      * Load GLSL shader code from embedded resources
@@ -54,7 +37,8 @@ int main() {
      */
     nanogui::GLShader mShader;
     Resource vertShader = LOAD_RESOURCE(vert_glsl);
-    Resource fragShader = LOAD_RESOURCE(frag_glsl);
+    //Resource fragShader = LOAD_RESOURCE(frag_glsl);
+    Resource fragShader = LOAD_RESOURCE(clouds_glsl);
     mShader.init("raymarching_shader",
                  string(vertShader.data(), vertShader.size()),
                  string(fragShader.data(), fragShader.size())
@@ -66,30 +50,34 @@ int main() {
     MatrixXu indices(3, 2);
     indices.col(0) << 0, 1, 2;
     indices.col(1) << 2, 1, 3;
+
     MatrixXf positions(3, 4);
     positions.col(0) << -1, -1, 0;
     positions.col(1) <<  1, -1, 0;
     positions.col(2) <<  -1,  1, 0;
     positions.col(3) << 1,  1, 0;
+
     // bind the shader and upload vertex positions and indices
     mShader.bind();
     mShader.uploadIndices(indices);
     mShader.uploadAttrib("a_position", positions);
+    mShader.setUniform( "time", globalTime);
 
     // Set initial value for modulation uniform
-    mShader.setUniform("modulation", modulation);
+    //mShader.setUniform("modulation", modulation);
 
     // Set resolution and screenRatio uniforms
     int fboWidth, fboHeight;
-    glfwGetFramebufferSize(app.glfwWindow(), &fboWidth, &fboHeight);
+    glfwGetFramebufferSize(app->glfwWindow(), &fboWidth, &fboHeight);
     mShader.setUniform("resolution", Vector2f{fboWidth, fboHeight});
+
     float mx = std::max<float>(fboWidth, fboHeight);
     auto xDim = fboWidth/mx;
     auto yDim = fboHeight/mx;
     mShader.setUniform("screenRatio", Vector2f{xDim, yDim});
 
-    app.drawAll();
-    app.setVisible(true);
+    app->drawAll();
+    app->setVisible(true);
 
     /**
      * 10: clear screen
@@ -98,22 +86,25 @@ int main() {
      * 40: draw GUI
      * 50: goto 10
      */
-    while (!glfwWindowShouldClose(app.glfwWindow()))
+    while (!glfwWindowShouldClose(app->glfwWindow()))
     {
         glClearColor(0,0,0,1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         mShader.bind();
-        mShader.setUniform("modulation", modulation);
+        //mShader.setUniform("modulation", modulation);
+        mShader.setUniform("time", globalTime);
 
         mShader.drawIndexed(GL_TRIANGLES, 0, 2);
 
-        app.drawWidgets();
+        app->drawWidgets();
 
-        glfwSwapBuffers(app.glfwWindow());
+        glfwSwapBuffers(app->glfwWindow());
         glfwPollEvents();
+
+        globalTime += 0.01;
     }
 
     nanogui::shutdown();
-    exit(EXIT_SUCCESS);
+    return 0;
 }

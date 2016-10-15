@@ -1,11 +1,15 @@
 # NanoGUI Test
 
+Shader source:
+http://glslsandbox.com/e#35192.0
+
 Includes CMake build, but before you can do that you will need
 to download the dependencies using git submodule...
 
     git submodule update --init --recursive
 
 Simple example looks like this:
+http://glslsandbox.com/e#35192.0
 
 ![Screenshot](https://raw.githubusercontent.com/darrenmothersele/nanogui-test/master/screenshot.png "Screenshot")
 
